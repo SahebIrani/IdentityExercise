@@ -1,0 +1,44 @@
+@model (string email, string code, string password)
+@{
+    ViewData["Title"] = "بازنشانی کلمه عبور";
+}
+
+<article class="home_banner_area pb-5">
+    <article class="container box_1620 d-flex align-content-center justify-content-center align-items-center text-right">
+        <article class="col-12 col-sm-10 col-xl-6">
+            <h1 class="text-center py-3 h4">بازنشانی کلمه عبور </h1>
+            <article>
+                <form class="p-1" method="post" asp-antiforgery="true">
+                    <fieldset>
+                        <div asp-validation-summary="All" class="text-danger"></div>
+                        <input asp-for="code" type="hidden" hidden />
+                        <div class="form-row mt-2">
+                            <div class="col-12 mb-3">
+                                <label class="pb-1 text-info" for="Email">پست الکترونیک</label>
+                                <input asp-for="email" id="Email" type="text" class="form-control" placeholder="شماره همراه یا پست الکترونیک" required />
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="pb-1 text-info" for="Password">کلمه عبور</label>
+                                <input asp-for="password" id="Password" type="password" class="form-control" placeholder="کلمه عبور خود را وارد نمایید" required />
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="pb-1 text-info" for="ConfirmPassword">تکرار کلمه عبور</label>
+                                <input asp-for="password" id="ConfirmPassword" type="password" class="form-control" placeholder="تکرار کلمه عبور خود را وارد نمایید" required />
+                            </div>
+                        </div>
+                        <div class="form-row mt-3">
+                            <button class="w-75 m-auto" type="submit">
+                                <span class="pr-2" style="font-size: 1.3rem;">بازنشانی کلمه عبور</span>
+                            </button>
+                        </div>
+                    </fieldset>
+                </form>
+            </article>
+        </article>
+    </article>
+</article>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

@@ -1,0 +1,42 @@
+@{
+    ViewData["Title"] = "ورود";
+}
+
+<article class="d-flex align-content-center justify-content-center align-items-center text-right">
+    <article class="col-12 col-sm-10 col-xl-6">
+        <h1 class="text-center py-3 h4">ورود به سایت</h1>
+        <article>
+            <form id="setupform"  asp-controller="Home" asp-action="LoginUserAsync" method="post">
+                <fieldset>
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    <div class="form-row">
+                        <div class="col-12 mb-3">
+                            <label class="pb-1 text-info" for="Email">پست الکترونیک</label>
+                            <input name="email" id="Email" type="text" class="form-control placeholder-rtl" placeholder="پست الکترونیک" required />
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="pb-1 text-info" for="Password">کلمه عبور</label>
+                            <input name="password" id="Password" type="password" class="form-control placeholder-rtl" placeholder="کلمه عبور خود را وارد نمایید" required />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-12 d-flex flex-column flex-sm-row justify-content-between align-content-center align-items-center">
+                            <section class="mt-2 mt-sm-0">
+                                <a asp-controller="Home" asp-action="ResetPassword" class="btn btn-link">کلمه عبور خود را فراموش کردید ؟؟؟</a>
+                            </section>
+                        </div>
+                    </div>
+                    <div class="form-row mt-3">
+                        <button class="w-75 m-auto" type="submit">
+                            <span class="pr-2" style="font-size: 1.3rem;">ورود</span>
+                        </button>
+                    </div>
+                </fieldset>
+            </form>
+        </article>
+    </article>
+</article>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
