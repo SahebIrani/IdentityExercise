@@ -166,8 +166,7 @@ namespace Simple.Controllers
                 else
                 {
                     string hashedNewPassword = UserManager.PasswordHasher.HashPassword(user, password);
-                    var userStore = new UserStore<User, Role, ApplicationDbContext, int>(ApplicationDbContext);
-                    await userStore.SetPasswordHashAsync(user, hashedNewPassword, cancellationToken);
+                    await PasswordStore.SetPasswordHashAsync(user, hashedNewPassword, cancellationToken);
                     await UserManager.UpdateAsync(user);
                     ViewBag.notification = "successful";
                     return View();

@@ -1,14 +1,11 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-using Simple.Data;
 using Simple.Models;
 using Simple.Models.Entities.Identity;
 
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Simple.Controllers
@@ -18,48 +15,33 @@ namespace Simple.Controllers
         public HomeController(
             ILogger<HomeController> logger,
 
-            ApplicationDbContext applicationDbContext,
-
             UserManager<User> userManager,
             RoleManager<Role> roleManager,
             SignInManager<User> signInManager,
 
             IUserStore<User> userStore,
-            IRoleStore<Role> roleStore,
-
-            IPasswordHasher<User> passwordHasher,
-            IPasswordValidator<User> passwordValidator
-
-        //IUserPasswordStore<User> passwordStore
+            IRoleStore<Role> roleStore
 
         //IUserValidator<User> userValidator,
         //IRoleValidator<User> roleValidator
         )
         {
             Logger = logger;
-            ApplicationDbContext = applicationDbContext;
             UserManager = userManager;
             RoleManager = roleManager;
             SignInManager = signInManager;
             UserStore = userStore;
             RoleStore = roleStore;
-            PasswordHasher = passwordHasher;
-            PasswordValidator = passwordValidator;
-            //PasswordStore = passwordStore;
             //UserValidator = userValidator;
             //RoleValidator = roleValidator;
         }
 
         public ILogger<HomeController> Logger { get; }
-        public ApplicationDbContext ApplicationDbContext { get; }
         public UserManager<User> UserManager { get; }
         public RoleManager<Role> RoleManager { get; }
         public SignInManager<User> SignInManager { get; }
         public IUserStore<User> UserStore { get; }
         public IRoleStore<Role> RoleStore { get; }
-        public IPasswordHasher<User> PasswordHasher { get; }
-        public IPasswordValidator<User> PasswordValidator { get; }
-        //public IUserPasswordStore<User> PasswordStore { get; }
         public IUserValidator<User> UserValidator { get; }
         public IRoleValidator<User> RoleValidator { get; }
 
@@ -74,10 +56,7 @@ namespace Simple.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> LoginUserAsync(
-            string email = "admin@test.com",
-            string password = "@GD3sg1546sy%#@ds&&sgD^as",
-            CancellationToken cancellationToken = default)
+        public async Task<IActionResult> LoginUserAsync(string email = "admin@test.com", string password = "@GD3sg1546sy%#@ds&&sgD^as")
         {
             User user = await UserManager.FindByEmailAsync(email);
             if (user == null)
@@ -85,15 +64,6 @@ namespace Simple.Controllers
                 ModelState.AddModelError(string.Empty, "لطفا از صحت اطلاعات وارد شده اطمینان حاصل کنید");
                 return View();
             }
-
-            var passwordHash = UserManager.PasswordHasher.HashPassword(user, password);
-            var newPasswordHash = PasswordHasher.HashPassword(user, password);
-            var newPasswordHash1 = PasswordHasher.HashPassword(user, password);
-
-            var passwordResult = await PasswordValidator.ValidateAsync(UserManager, user, password);
-            var newPasswordHash2 = PasswordHasher.HashPassword(user, password);
-            var userStore = new UserStore<User, Role, ApplicationDbContext, int>(ApplicationDbContext);
-            await userStore.SetPasswordHashAsync(user, password, cancellationToken);
 
             var checkPassSignIn = await SignInManager.CheckPasswordSignInAsync(user, password, true);
             if (checkPassSignIn.Succeeded)
@@ -121,8 +91,7 @@ namespace Simple.Controllers
         public async Task<IActionResult> ResetPasswordAsync(
             string code,
             string email = "admin@test.com",
-            string password = "@GD3sg1546sy%#@ds&&sgD^as",
-            CancellationToken cancellationToken = default
+            string password = "@GD3sg1546sy%#@ds&&sgD^as"
         )
         {
             User user = await UserManager.FindByEmailAsync(email);
@@ -139,46 +108,8 @@ namespace Simple.Controllers
             foreach (IdentityError error in result.Errors)
                 ModelState.AddModelError(string.Empty, error.Description);
 
-
-
-            user.PasswordHash = UserManager.PasswordHasher.HashPassword(user, password);
-            var resultt = await UserManager.UpdateAsync(user);
-            if (!resultt.Succeeded)
-            {
-            }
-            var token = await UserManager.GeneratePasswordResetTokenAsync(user);
-            var resulttt = await UserManager.ResetPasswordAsync(user, token, password);
-            var resultttt = await UserManager.ChangePasswordAsync(user, password, password);
-            await UserManager.RemovePasswordAsync(user);
-            await UserManager.AddPasswordAsync(user, password);
-            if (!await UserManager.CheckPasswordAsync(user, password))
-            {
-                ViewBag.Notification = "Incorrect password ..";
-                return View();
-            }
-            else
-            {
-                if (password != password)
-                {
-                    ViewBag.notification = "try again";
-                    return View();
-                }
-                else
-                {
-                    string hashedNewPassword = UserManager.PasswordHasher.HashPassword(user, password);
-                    var userStore = new UserStore<User, Role, ApplicationDbContext, int>(ApplicationDbContext);
-                    await userStore.SetPasswordHashAsync(user, hashedNewPassword, cancellationToken);
-                    await UserManager.UpdateAsync(user);
-                    ViewBag.notification = "successful";
-                    return View();
-                }
-            }
+            return View();
         }
-
-        //public virtual IdentityBuilder AddPasswordValidator<TUser>() where TUser : class
-        //{
-        //    return this.AddScoped(typeof(IPasswordValidator<>).MakeGenericType(this.UserType), typeof(TUser));
-        //}
 
         public IActionResult Privacy()
         {

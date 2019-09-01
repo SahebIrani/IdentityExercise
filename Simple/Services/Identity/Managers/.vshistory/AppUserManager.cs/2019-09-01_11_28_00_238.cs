@@ -37,7 +37,8 @@ namespace Simple.Services.Identity.Managers
         public override Task<IdentityResult> ResetPasswordAsync(User user, string token, string newPassword)
         {
             string h = PasswordHasher.HashPassword(user, "");
-            var lp = PasswordValidators;
+            var lp = this.PasswordValidators;
+
             return base.ResetPasswordAsync(user, token, newPassword);
         }
     }

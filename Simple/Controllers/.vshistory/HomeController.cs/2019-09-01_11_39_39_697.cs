@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-using Simple.Data;
 using Simple.Models;
 using Simple.Models.Entities.Identity;
 
@@ -18,8 +16,6 @@ namespace Simple.Controllers
         public HomeController(
             ILogger<HomeController> logger,
 
-            ApplicationDbContext applicationDbContext,
-
             UserManager<User> userManager,
             RoleManager<Role> roleManager,
             SignInManager<User> signInManager,
@@ -28,16 +24,15 @@ namespace Simple.Controllers
             IRoleStore<Role> roleStore,
 
             IPasswordHasher<User> passwordHasher,
-            IPasswordValidator<User> passwordValidator
+            IPasswordValidator<User> passwordValidator,
 
-        //IUserPasswordStore<User> passwordStore
+            IUserPasswordStore<User> passwordStore
 
         //IUserValidator<User> userValidator,
         //IRoleValidator<User> roleValidator
         )
         {
             Logger = logger;
-            ApplicationDbContext = applicationDbContext;
             UserManager = userManager;
             RoleManager = roleManager;
             SignInManager = signInManager;
@@ -45,13 +40,12 @@ namespace Simple.Controllers
             RoleStore = roleStore;
             PasswordHasher = passwordHasher;
             PasswordValidator = passwordValidator;
-            //PasswordStore = passwordStore;
+            PasswordStore = passwordStore;
             //UserValidator = userValidator;
             //RoleValidator = roleValidator;
         }
 
         public ILogger<HomeController> Logger { get; }
-        public ApplicationDbContext ApplicationDbContext { get; }
         public UserManager<User> UserManager { get; }
         public RoleManager<Role> RoleManager { get; }
         public SignInManager<User> SignInManager { get; }
@@ -59,7 +53,7 @@ namespace Simple.Controllers
         public IRoleStore<Role> RoleStore { get; }
         public IPasswordHasher<User> PasswordHasher { get; }
         public IPasswordValidator<User> PasswordValidator { get; }
-        //public IUserPasswordStore<User> PasswordStore { get; }
+        public IUserPasswordStore<User> PasswordStore { get; }
         public IUserValidator<User> UserValidator { get; }
         public IRoleValidator<User> RoleValidator { get; }
 
@@ -74,10 +68,7 @@ namespace Simple.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> LoginUserAsync(
-            string email = "admin@test.com",
-            string password = "@GD3sg1546sy%#@ds&&sgD^as",
-            CancellationToken cancellationToken = default)
+        public async Task<IActionResult> LoginUserAsync(string email = "admin@test.com", string password = "@GD3sg1546sy%#@ds&&sgD^as")
         {
             User user = await UserManager.FindByEmailAsync(email);
             if (user == null)
@@ -92,8 +83,7 @@ namespace Simple.Controllers
 
             var passwordResult = await PasswordValidator.ValidateAsync(UserManager, user, password);
             var newPasswordHash2 = PasswordHasher.HashPassword(user, password);
-            var userStore = new UserStore<User, Role, ApplicationDbContext, int>(ApplicationDbContext);
-            await userStore.SetPasswordHashAsync(user, password, cancellationToken);
+            await PasswordStore.SetPasswordHashAsync(user, password, cancellationToken);
 
             var checkPassSignIn = await SignInManager.CheckPasswordSignInAsync(user, password, true);
             if (checkPassSignIn.Succeeded)
@@ -139,46 +129,8 @@ namespace Simple.Controllers
             foreach (IdentityError error in result.Errors)
                 ModelState.AddModelError(string.Empty, error.Description);
 
-
-
-            user.PasswordHash = UserManager.PasswordHasher.HashPassword(user, password);
-            var resultt = await UserManager.UpdateAsync(user);
-            if (!resultt.Succeeded)
-            {
-            }
-            var token = await UserManager.GeneratePasswordResetTokenAsync(user);
-            var resulttt = await UserManager.ResetPasswordAsync(user, token, password);
-            var resultttt = await UserManager.ChangePasswordAsync(user, password, password);
-            await UserManager.RemovePasswordAsync(user);
-            await UserManager.AddPasswordAsync(user, password);
-            if (!await UserManager.CheckPasswordAsync(user, password))
-            {
-                ViewBag.Notification = "Incorrect password ..";
-                return View();
-            }
-            else
-            {
-                if (password != password)
-                {
-                    ViewBag.notification = "try again";
-                    return View();
-                }
-                else
-                {
-                    string hashedNewPassword = UserManager.PasswordHasher.HashPassword(user, password);
-                    var userStore = new UserStore<User, Role, ApplicationDbContext, int>(ApplicationDbContext);
-                    await userStore.SetPasswordHashAsync(user, hashedNewPassword, cancellationToken);
-                    await UserManager.UpdateAsync(user);
-                    ViewBag.notification = "successful";
-                    return View();
-                }
-            }
+            return View();
         }
-
-        //public virtual IdentityBuilder AddPasswordValidator<TUser>() where TUser : class
-        //{
-        //    return this.AddScoped(typeof(IPasswordValidator<>).MakeGenericType(this.UserType), typeof(TUser));
-        //}
 
         public IActionResult Privacy()
         {

@@ -28,9 +28,9 @@ namespace Simple.Controllers
             IRoleStore<Role> roleStore,
 
             IPasswordHasher<User> passwordHasher,
-            IPasswordValidator<User> passwordValidator
+            IPasswordValidator<User> passwordValidator,
 
-        //IUserPasswordStore<User> passwordStore
+            //IUserPasswordStore<User> passwordStore
 
         //IUserValidator<User> userValidator,
         //IRoleValidator<User> roleValidator
@@ -59,7 +59,7 @@ namespace Simple.Controllers
         public IRoleStore<Role> RoleStore { get; }
         public IPasswordHasher<User> PasswordHasher { get; }
         public IPasswordValidator<User> PasswordValidator { get; }
-        //public IUserPasswordStore<User> PasswordStore { get; }
+        public IUserPasswordStore<User> PasswordStore { get; }
         public IUserValidator<User> UserValidator { get; }
         public IRoleValidator<User> RoleValidator { get; }
 
@@ -92,8 +92,9 @@ namespace Simple.Controllers
 
             var passwordResult = await PasswordValidator.ValidateAsync(UserManager, user, password);
             var newPasswordHash2 = PasswordHasher.HashPassword(user, password);
+            await PasswordStore.SetPasswordHashAsync(user, password, cancellationToken);
+
             var userStore = new UserStore<User, Role, ApplicationDbContext, int>(ApplicationDbContext);
-            await userStore.SetPasswordHashAsync(user, password, cancellationToken);
 
             var checkPassSignIn = await SignInManager.CheckPasswordSignInAsync(user, password, true);
             if (checkPassSignIn.Succeeded)
@@ -166,8 +167,7 @@ namespace Simple.Controllers
                 else
                 {
                     string hashedNewPassword = UserManager.PasswordHasher.HashPassword(user, password);
-                    var userStore = new UserStore<User, Role, ApplicationDbContext, int>(ApplicationDbContext);
-                    await userStore.SetPasswordHashAsync(user, hashedNewPassword, cancellationToken);
+                    await PasswordStore.SetPasswordHashAsync(user, hashedNewPassword, cancellationToken);
                     await UserManager.UpdateAsync(user);
                     ViewBag.notification = "successful";
                     return View();

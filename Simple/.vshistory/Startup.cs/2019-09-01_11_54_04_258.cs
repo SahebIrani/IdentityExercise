@@ -49,6 +49,8 @@ namespace Simple
               .AddPasswordValidator<AppPasswordValidator<User>>()
               .AddDefaultTokenProviders();
 
+            services.AddScoped<IUserPasswordStore<User>>();
+
             services.AddControllersWithViews();
             services.AddRazorPages();
         }
