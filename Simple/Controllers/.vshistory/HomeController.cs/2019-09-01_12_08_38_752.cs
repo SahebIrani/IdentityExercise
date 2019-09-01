@@ -97,8 +97,6 @@ namespace Simple.Controllers
             var context = userStore.Context as ApplicationDbContext;
             var task = userStore.GetPasswordHashAsync(user);
             var task2 = userStore.HasPasswordAsync(user);
-            var task3 = userStore.GetSecurityStampAsync(user);
-            var task4 = userStore.SetSecurityStampAsync(user, "stamp");
 
 
             var checkPassSignIn = await SignInManager.CheckPasswordSignInAsync(user, password, true);
